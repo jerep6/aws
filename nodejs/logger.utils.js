@@ -35,11 +35,11 @@ if (config.log.fluentd.use) {
   console.log('Use log_fluentd logger');
   logger.add(require('winston-fluent').Fluent, {
     level: 'debug',
-    tag: 'affiliation',
-    label: "affiliationlabel",
+    tag: 'xebia',
+    label: "nodejs",
     options: {
-      host: config.log.log_fluentd.host,
-      port: config.log.log_fluentd.port
+      host: config.log.fluentd.host,
+      port: config.log.fluentd.port
     }
   }, false);
 }

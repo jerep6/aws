@@ -9,6 +9,6 @@
   "dependencies": {
     "lodash": "4.17.4",
     "winston": "2.3.1",
-    "winston-fluent": "git+ssh://git@pscm01.travelcom.michelin-travel.com:AFFILIATION/winston-fluent.git#1.0.3"
+    "winston-fluent": "https://github.com/jerep6/winston-fluent#master"
   }
 }

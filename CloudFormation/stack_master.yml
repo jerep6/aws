@@ -1,0 +1,12 @@
+# https://github.com/envato/stack_master
+region_aliases:
+  dev: eu-west-1
+stack_defaults:
+  tags:
+    Owner: xebia
+stacks:
+  dev:
+    fluentd-EIP:
+      template: fluentd-EIP.yml
+    fluentd-HA:
+      template: fluentd-HA.yml

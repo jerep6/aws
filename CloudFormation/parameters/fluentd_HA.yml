@@ -1,0 +1,6 @@
+InstanceType: t2.micro
+KeyName: masterkey-dev
+VpcId: vpc-ffc5a09b
+SubnetsIds: "subnet-8ac3bbee,subnet-56c94c0e"
+AWSsign: 'true'
+ElasticsearchUrl: https://search-affiliation-logs-vxrppce4eoqjpwgmeetnysfm2m.eu-west-1.es.amazonaws.com

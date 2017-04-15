@@ -340,12 +340,12 @@ Resources:
                   # For Elasticsearch aws service (sign V4)
                   type "aws-elasticsearch-service"
                   # Index prefix
-                  logstash_prefix affiliationfluentd
+                  logstash_prefix logsfluentd
                   logstash_format true
                   include_tag_key
                   request_timeout 15s
                   reconnect_on_error true
-                  template_name affiliationfluentd-*
+                  template_name logsfluentd-*
                   template_file /etc/td-agent/elasticsearch.template.conf
 
                   <endpoint>
@@ -391,12 +391,12 @@ Resources:
                   hosts ${ElasticsearchUrl}
 
                   # Index prefix
-                  logstash_prefix affiliationfluentd
+                  logstash_prefix logsfluentd
                   logstash_format true
                   include_tag_key
                   request_timeout 15s
                   reconnect_on_error true
-                  template_name affiliationfluentd-*
+                  template_name logsfluentd-*
                   template_file /etc/td-agent/elasticsearch.template.conf
 
                   # buffering
@@ -420,54 +420,54 @@ Resources:
           packages:
             yum:
               td-agent: []
-            files:
-              '/etc/td-agent/elasticsearch.template.conf':
-                content: !Sub |
-                  {
-                    "template": "affiliationfluentd-*",
-                    "settings": {
-                      "number_of_shards": 1,
-                      "number_of_replicas": 0,
-                      "index": {
-                        "refresh_interval": "5s",
-                        "query": { "default_field": "message" },
-                        "routing": { "allocation.total_shards_per_node": 1 }
-                      }
-                    },
-                    "mappings": {
-                      "_default_": {
-                        "_all": { "enabled": false, "omit_norms": true },
-                        "_source": { "enabled": true },
-                        "dynamic_templates": [
-                          {
-                            "string_fields": {
-                              "match": "*",
-                              "match_mapping_type": "string",
-                              "mapping": {
-                                "type": "string", "index": "analyzed", "omit_norms": true,
-                                "fields": {
-                                  "raw": { "type": "keyword", "ignore_above": 256 }
-                                }
+          files:
+            '/etc/td-agent/elasticsearch.template.conf':
+              content: !Sub |
+                {
+                  "template": "logsfluentd-*",
+                  "settings": {
+                    "number_of_shards": 1,
+                    "number_of_replicas": 0,
+                    "index": {
+                      "refresh_interval": "5s",
+                      "query": { "default_field": "message" },
+                      "routing": { "allocation.total_shards_per_node": 1 }
+                    }
+                  },
+                  "mappings": {
+                    "_default_": {
+                      "_all": { "enabled": false, "omit_norms": true },
+                      "_source": { "enabled": true },
+                      "dynamic_templates": [
+                        {
+                          "string_fields": {
+                            "match": "*",
+                            "match_mapping_type": "string",
+                            "mapping": {
+                              "type": "string", "index": "analyzed", "omit_norms": true,
+                              "fields": {
+                                "raw": { "type": "keyword", "ignore_above": 256 }
                               }
                             }
                           }
-                        ],
-                        "properties": {
-                          "@timestamp": { "type": "date", "index": "not_analyzed" },
-                          "@version": { "type": "keyword" },
-                          "message": { "type": "text" },
-                          "severity": { "type": "keyword" },
-                          "fields": {
-                            "type": "object",
-                            "dynamic": true
-                          }
+                        }
+                      ],
+                      "properties": {
+                        "@timestamp": { "type": "date", "index": "not_analyzed" },
+                        "@version": { "type": "keyword" },
+                        "message": { "type": "text" },
+                        "severity": { "type": "keyword" },
+                        "fields": {
+                          "type": "object",
+                          "dynamic": true
                         }
                       }
                     }
                   }
-                mode: '000644'
-                owner: root
-                group: root
+                }
+              mode: '000644'
+              owner: root
+              group: root
 
         fluentd-service:
           services:

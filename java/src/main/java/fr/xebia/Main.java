@@ -15,7 +15,7 @@ public class Main {
         Integer timeToProcess = 87;
         RuntimeException npe = new NullPointerException();
 
-        LOGGER.info("Read count=" + users.size() + " users in database in duration=" + timeToProcess + "ms with log type=dbread");
+        LOGGER.info("Read count=" + users.size() + " users in database in duration=" + timeToProcess + " ms with log type=dbread");
         LOGGER.error("Error when insert userId="+ userId +" into database with log type=dbread", npe);
 
         Thread.sleep(2000);

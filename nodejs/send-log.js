@@ -2,7 +2,7 @@ const logger = require('./logger.utils');
 
 
 // Generate data for logging
-const err = new Error("Error for test"),
+const err = new Error("No user in database"),
   users = ["A", "B", "C"],
   userId = "XCTYPO-YDGBNC"
   timeToProcess = 87;

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>
+                %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
+            </Pattern>
+        </layout>
+    </appender>
+
+
+
+    <appender name="FLUENT_SYNC" class="fr.xebia.logger.FluentdLogbackAppender">
+        <tag>xebia</tag>
+        <label>java</label>
+        <remoteHost>URL_ELB</remoteHost>
+        <port>24224</port>
+        <additionalField>
+            <key>app</key>
+            <value>test</value>
+        </additionalField>
+    </appender>
+
+    <appender name="FLUENT" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- https://logback.qos.ch/manual/appenders.html#AsyncAppender-->
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <appender-ref ref="FLUENT_SYNC" />
+    </appender>
+
+    <logger name="fr.xebia" level="debug" additivity="false">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="FLUENT" />
+    </logger>
+
+    <root level="error">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>

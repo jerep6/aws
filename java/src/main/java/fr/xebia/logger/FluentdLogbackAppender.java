@@ -15,7 +15,7 @@ import ch.qos.logback.core.UnsynchronizedAppenderBase;
 
 public class FluentdLogbackAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
     private FluentLogger fluentLogger;
-    Pattern patternMetadata = Pattern.compile("([\\w\\d-]+=[\\w\\d-]+)+", Pattern.CASE_INSENSITIVE);
+    private Pattern patternMetadata = Pattern.compile("([\\w\\d-]+=[\\w\\d-]+)+", Pattern.CASE_INSENSITIVE);
 
     @Override
     public void start() {
@@ -84,10 +84,7 @@ public class FluentdLogbackAppender extends UnsynchronizedAppenderBase<ILoggingE
     private Object convertData(String dataToConvert) {
         if(isNumeric(dataToConvert)) {
             return Double.parseDouble(dataToConvert);
-        }
-        else {
-            return dataToConvert;
-        }
+        } else { return dataToConvert; }
     }
 
 

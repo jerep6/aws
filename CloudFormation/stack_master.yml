@@ -6,6 +6,8 @@ stack_defaults:
     Owner: xebia
 stacks:
   dev:
+    vpc:
+      template: vpc.yml
     fluentd-EIP:
       template: fluentd-EIP.yml
     fluentd-HA:

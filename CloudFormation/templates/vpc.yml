@@ -12,6 +12,12 @@ Metadata:
         default: VPC Parameters
       Parameters:
       - ClassB
+      - Env
+    - Label:
+        default: Availabity Parameters
+      Parameters:
+      - NumberOfAZ
+      - HAMode
 
 
 ###############################################################################

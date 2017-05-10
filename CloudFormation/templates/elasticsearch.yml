@@ -1,0 +1,146 @@
+Description: Elasticsearch domain
+
+Parameters:
+  DomainName:
+    Type: String
+    Description: Domaine name of the cluster
+  MasterType:
+    Type: String
+    Default: t2.small.elasticsearch
+    Description: Type of master instance
+  MasterCount:
+    Type: String
+    Default: '0'
+    Description: Number of instance in the cluster
+  ZoneAwarenessEnabled:
+    Type: String
+    Default: 'false'
+    Description: Activate ZoneAwareness
+  InstanceType:
+    Type: String
+    Default: t2.small.elasticsearch
+    Description: Type of node instance
+  InstanceCount:
+    Type: Number
+    Default: 1
+    Description: Number of instance in the cluster
+  VolumeSize:
+    Type: Number
+    Default: 35
+    Description: Size in GB of EBS volume
+  IPToTrust:
+    Type: CommaDelimitedList
+    Default: ''
+    Description: CommaDelimitedList of ip to allow
+  EBS:
+    Type: String
+    Default: 'true'
+    Description: Type of disk to store data
+  BucketForSnapshot:
+    Type: String
+    Default: ''
+    Description: Bucket name into store manuel snapshot
+  VolumeType:
+    Type: String
+    Default: 'gp2'
+    Description: Volume type
+  Iops:
+    Type: Number
+    Default: 0
+    Description: IOPS
+
+Conditions:
+  MasterEnabled: !Not [!Equals ["0", !Ref MasterCount]]
+  UseEBS: !Equals ["true", !Ref EBS]
+  ManualSnapshotEnabled: !Not [!Equals ["", !Ref BucketForSnapshot]]
+
+Resources:
+  Domain:
+    Type: AWS::Elasticsearch::Domain
+    Properties:
+      AccessPolicies:
+        Version: '2012-10-17'
+        Statement:
+        - Sid: Allow AWS Account
+          Effect: Allow
+          Principal:
+            AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+          Action: es:*
+          Resource: !Sub "arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${DomainName}/*"
+        - Sid: Allow IP
+          Effect: Allow
+          Principal:
+            AWS: "*"
+          Action: es:*
+          Condition:
+            IpAddress:
+              aws:SourceIp:
+                Ref: IPToTrust
+          Resource: !Sub "arn:aws:es:${AWS::Region}:${AWS::AccountId}:domain/${DomainName}/*"
+      DomainName: !Ref DomainName
+      EBSOptions:
+        Fn::If:
+          - UseEBS
+          - EBSEnabled: 'true'
+            VolumeSize: !Ref VolumeSize
+            VolumeType: !Ref VolumeType
+            Iops: !Ref Iops
+          - !Ref AWS::NoValue
+      ElasticsearchVersion: '5.1'
+      ElasticsearchClusterConfig:
+        DedicatedMasterCount: !If [MasterEnabled, !Ref MasterCount, !Ref "AWS::NoValue"]
+        DedicatedMasterEnabled: !If [MasterEnabled, "true", "false"]
+        DedicatedMasterType: !If [MasterEnabled, !Ref MasterType, !Ref "AWS::NoValue"]
+        InstanceCount: !Ref InstanceCount
+        InstanceType: !Ref InstanceType
+        ZoneAwarenessEnabled: !Ref ZoneAwarenessEnabled
+      SnapshotOptions:
+        AutomatedSnapshotStartHour: '22'
+      AdvancedOptions:
+        rest.action.multi.allow_explicit_index: "true"
+        indices.fielddata.cache.size: ""
+
+  SnapshotRole:
+    Type: AWS::IAM::Role
+    Condition: ManualSnapshotEnabled
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: es.amazonaws.com
+          Action: sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns: []
+      Policies:
+      - PolicyName: AllowS3ForBackup
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Action:
+            - s3:ListBucket
+            Effect: Allow
+            Resource: !Sub "arn:aws:s3:::${BucketForSnapshot}"
+          - Action:
+              - s3:GetObject
+              - s3:PutObject
+              - s3:DeleteObject
+              - iam:PassRole
+            Effect: Allow
+            Resource: !Sub "arn:aws:s3:::${BucketForSnapshot}/*"
+
+Outputs:
+  DomainArn:
+    Description: DomainArn
+    Value: !GetAtt Domain.DomainArn
+
+  DomainEndpoint:
+    Description: DomainEndpoint
+    Value: !GetAtt Domain.DomainEndpoint
+    Export:
+      Name: !Sub "${AWS::StackName}-DomainEndpoint"
+  SnapshotRole:
+    Condition: ManualSnapshotEnabled
+    Description: Role to take snapshot
+    Value: !Ref SnapshotRole

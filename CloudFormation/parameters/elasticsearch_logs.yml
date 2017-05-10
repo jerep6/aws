@@ -1,0 +1,3 @@
+DomainName: xebia-logs
+InstanceType: t2.small.elasticsearch
+IPToTrust: ''

@@ -8,7 +8,11 @@ stacks:
   dev:
     vpc:
       template: vpc.yml
+
+  ### EFK ###
     fluentd-EIP:
       template: fluentd-EIP.yml
     fluentd-HA:
       template: fluentd-HA.yml
+    elasticsearch-logs:
+      template: elasticsearch.yml

@@ -32,6 +32,13 @@ Parameters:
     AllowedValues:
     - true
     - false
+  PrivateELB:
+    Type: String
+    Default: 'true'
+    Description: indicate if ELB is only accessible into the VPC
+    AllowedValues:
+    - true
+    - false
   BastionSecurityGroup:
     Type: String
     Default: 'sg-xxxxxxxx'
@@ -83,6 +90,7 @@ Mappings:
 Conditions:
   isAWSSign: !Equals [!Ref AWSsign, 'true']
   hasBastion: !Not [!Equals [!Ref BastionSecurityGroup, 'sg-xxxxxxxx']]
+  isPrivateELB: !Equals [!Ref PrivateELB, 'true']
 
 ###############################################################################
 ### Outputs
@@ -112,7 +120,7 @@ Resources:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     Properties:
       Subnets: !Ref SubnetsIds
-      Scheme: internal
+      Scheme: !If [isPrivateELB, internal, internet-facing]
       CrossZone: true
       Listeners:
       - LoadBalancerPort: 24224
@@ -511,7 +519,7 @@ Resources:
       - !Ref LoadBalancer
       Tags:
       - Key: Name
-        Value: !Sub 'affiliation-fluentd'
+        Value: !Sub 'fluentd'
         PropagateAtLaunch: true
       VPCZoneIdentifier: !Ref SubnetsIds
       MetricsCollection:

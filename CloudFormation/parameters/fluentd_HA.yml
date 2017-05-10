@@ -1,6 +1,7 @@
-InstanceType: t2.micro
-KeyName: masterkey-dev
-VpcId: vpc-ffc5a09b
-SubnetsIds: "subnet-8ac3bbee,subnet-56c94c0e"
+InstanceType: t2.nano
+KeyName: jpinsolle
+VpcId: vpc-19b1977d
+SubnetsIds: "subnet-86d2e3e2"
 AWSsign: 'true'
-ElasticsearchUrl: https://search-affiliation-logs-vxrppce4eoqjpwgmeetnysfm2m.eu-west-1.es.amazonaws.com
+ElasticsearchUrl: https://search-xebia-logs-33jfuxteyv6d2jiwokw7ormbze.eu-west-1.es.amazonaws.com
+PrivateELB: false

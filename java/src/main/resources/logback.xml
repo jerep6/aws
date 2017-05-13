@@ -1,14 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <property name="CONSOLE_NAME" value="CONSOLE"/>
+    <property name="LOGMATIC_NAME" value="LOGMATIC_OFF" />
+    <property name="FLUENTD_NAME" value="FLUENTD" />
 
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <layout class="ch.qos.logback.classic.PatternLayout">
-            <Pattern>
-                %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
-            </Pattern>
-        </layout>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <Pattern>%date{yyyy/MM/dd HH:mm:ss.SSS,Europe/Paris} %5level [%thread] %logger{16} | [Key=%X{key}] period=%X{period} - %m%n</Pattern>
+        </encoder>
     </appender>
 
+    <appender name="CONSOLE_OFF" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <Pattern>%date{yyyy/MM/dd HH:mm:ss.SSS,Europe/Paris} %5level [%thread] %logger{16} | [Key=%X{key}] period=%X{period} - %m%n</Pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>OFF</level>
+        </filter>
+    </appender>
 
 
     <appender name="FLUENT_SYNC" class="fr.xebia.logger.FluentdLogbackAppender">
@@ -22,7 +31,25 @@
         </additionalField>
     </appender>
 
-    <appender name="FLUENT" class="ch.qos.logback.classic.AsyncAppender">
+    <appender name="LOGMATIC" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>api.logmatic.io:10514</destination>
+        <keepAliveDuration>1 minute</keepAliveDuration>
+
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"logmaticKey":"XXXXXXXXXXX", "@marker": ["xebia-logs"]}</customFields>
+            <includeMdc>true</includeMdc>
+        </encoder>
+    </appender>
+
+    <appender name="LOGMATIC_OFF" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder><Pattern>-</Pattern></encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>OFF</level>
+        </filter>
+    </appender>
+
+
+    <appender name="FLUENTD" class="ch.qos.logback.classic.AsyncAppender">
         <!-- https://logback.qos.ch/manual/appenders.html#AsyncAppender-->
         <queueSize>512</queueSize>
         <discardingThreshold>0</discardingThreshold>
@@ -30,11 +57,15 @@
     </appender>
 
     <logger name="fr.xebia" level="debug" additivity="false">
-        <appender-ref ref="STDOUT" />
-        <appender-ref ref="FLUENT" />
+        <appender-ref ref="${CONSOLE_NAME}" />
+        <appender-ref ref="${FLUENTD_NAME}" />
+        <appender-ref ref="${LOGMATIC_NAME}" />
     </logger>
 
-    <root level="error">
-        <appender-ref ref="STDOUT" />
+
+    <root level="WARN">
+        <appender-ref ref="${CONSOLE_NAME}" />
+        <appender-ref ref="${LOGMATIC_NAME}" />
+        <appender-ref ref="${FLUENTD_NAME}" />
     </root>
 </configuration>

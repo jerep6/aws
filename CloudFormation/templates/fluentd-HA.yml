@@ -134,6 +134,8 @@ Resources:
         UnhealthyThreshold: 5
         Interval: 10
         Timeout: 5
+      ConnectionSettings:
+        IdleTimeout: 3600
 
   ElbSecurityGroup:
     Type: AWS::EC2::SecurityGroup

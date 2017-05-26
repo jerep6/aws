@@ -1,0 +1,65 @@
+version: '3'
+
+services:
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.4.0
+    container_name: elasticsearch-logs
+    environment:
+      - cluster.name=docker-cluster
+#      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+#      - "ES_JAVA_OPTS=-Xms512m -Xmx4000m"
+    deploy:
+      resources:
+        limits:
+          memory: 5G
+    volumes:
+      - es_data_logs:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - elasticsearch-network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:5.4.0
+    container_name: kibana-logs
+    depends_on:
+      - elasticsearch
+    environment:
+      ELASTICSEARCH_URL: "http://elasticsearch:9200"
+    ports:
+      - 5601:5601
+    networks:
+      - elasticsearch-network
+
+  head:
+    image: mobz/elasticsearch-head:5
+    container_name: head-logs
+    ports:
+      - 9100:9100
+    networks:
+      - elasticsearch-network
+
+  fluentd:
+    image: telematicsdevteam/fluentd-elasticsearch:latest
+    container_name: fluentd-logs
+    depends_on:
+      - elasticsearch
+    restart: always
+    environment:
+      FLUENTD_CONF: td-agent.conf
+    volumes:
+      - ./conf:/fluentd/etc
+    ports:
+      - 24224:24224
+    networks:
+      - elasticsearch-network
+
+
+volumes:
+  es_data_logs:
+    driver: local
+
+networks:
+  elasticsearch-network:

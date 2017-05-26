@@ -1,0 +1,42 @@
+{
+  "template": "logsfluentd-*",
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "index": {
+      "refresh_interval": "5s",
+      "query": { "default_field": "message" },
+      "routing": { "allocation.total_shards_per_node": 1 }
+    }
+  },
+  "mappings": {
+    "_default_": {
+      "_all": { "enabled": false, "omit_norms": true },
+      "_source": { "enabled": true },
+      "dynamic_templates": [
+        {
+          "string_fields": {
+            "match": "*",
+            "match_mapping_type": "string",
+            "mapping": {
+              "type": "keyword", "ignore_above": 256,
+              "fields": {
+                "string": { "type": "string", "index": "analyzed", "omit_norms": true }
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "@timestamp": { "type": "date", "index": "not_analyzed" },
+        "@version": { "type": "keyword" },
+        "message": { "type": "text" },
+        "severity": { "type": "keyword" },
+        "fields": {
+          "type": "object",
+          "dynamic": true
+        }
+      }
+    }
+  }
+}

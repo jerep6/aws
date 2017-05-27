@@ -8,6 +8,8 @@ stacks:
   dev:
     vpc:
       template: vpc.yml
+    firehose:
+      template: firehose.yml
 
   ### EFK ###
     fluentd-EIP:

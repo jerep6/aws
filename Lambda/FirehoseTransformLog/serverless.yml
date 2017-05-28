@@ -1,0 +1,22 @@
+service: FirehoseLogs
+
+provider:
+  name: aws
+  region: eu-west-1
+  deploymentBucket: jpinsolle-xebia
+  runtime: nodejs6.10
+  versionFunctions: false
+
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "firehose:*"
+      Resource: "*"
+
+functions:
+  FirehoseConvertLogs:
+    name: FirehoseConvertLogs
+    handler: index.handler
+    memorySize: 128
+    timeout: 120
+    description: Extract key-value informations from logs

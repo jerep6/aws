@@ -7,6 +7,9 @@ Description: 'Firehose stream for logs'
 ### Parameters
 ###############################################################################
 Parameters:
+  StreamName:
+    Type: String
+    Default: 'LogsToElasticsearch'
   ElasticsearchArn:
     Type: String
     Description: ARN of the Elasticsearch to send logs
@@ -14,7 +17,7 @@ Parameters:
     Type: String
     Default: ''
     Description: S3 bucket to log. If no bucket create it with random name
-  ArnLambdaToTransform:
+  LambdaToTransform:
     Type: String
     Default: ''
     Description: If no provided, no transformation is done
@@ -30,7 +33,7 @@ Parameters:
 ###############################################################################
 Conditions:
   createS3: !Equals [!Ref S3NameToWriteFailMessages, '']
-  transformStream: !Not [!Equals [!Ref ArnLambdaToTransform, '']]
+  transformStream: !Not [!Equals [!Ref LambdaToTransform, '']]
 
 ###############################################################################
 ### Outputs
@@ -43,6 +46,8 @@ Outputs:
     Value: !Ref DeliveryStream
   IAMRole:
     Value: !Ref IAMRole
+  StreamName:
+    Value: !Ref StreamName
 
 ###############################################################################
 ### Resources
@@ -50,8 +55,9 @@ Outputs:
 Resources:
   DeliveryStream:
     Type: "AWS::KinesisFirehose::DeliveryStream"
+    DependsOn: LogGroupFirehose
     Properties:
-      DeliveryStreamName: LogsToElasticsearch
+      DeliveryStreamName: !Ref StreamName
       ElasticsearchDestinationConfiguration:
         BufferingHints:
           IntervalInSeconds: 60
@@ -59,7 +65,7 @@ Resources:
         CloudWatchLoggingOptions:
           Enabled: true
           LogGroupName: !Ref LogGroupFirehose
-          LogStreamName: firehose
+          LogStreamName: "ElasticsearchDelivery"
         DomainARN: !Ref ElasticsearchArn
         IndexName: logsfirehose
         TypeName: log
@@ -76,7 +82,7 @@ Resources:
           CloudWatchLoggingOptions:
             Enabled: true
             LogGroupName: !Ref LogGroupFirehose
-            LogStreamName: firehose
+            LogStreamName: s3
           CompressionFormat: GZIP
           Prefix: firehose-logs
           RoleARN: !GetAtt ["IAMRole", "Arn"]
@@ -175,7 +181,7 @@ Resources:
                   - "lambda:InvokeFunction"
                   - "lambda:GetFunctionConfiguration"
                 Resource:
-                  - !Ref ArnLambdaToTransform
+                  - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${LambdaToTransform}:$LATEST"
           - !Ref AWS::NoValue
 
   S3ForFailMessage:

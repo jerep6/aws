@@ -36,7 +36,7 @@ public class FluentdLogbackAppender extends UnsynchronizedAppenderBase<ILoggingE
 
     @Override
     protected void append(ILoggingEvent rawData) {
-        final Map<String, Object> data = new HashMap<String, Object>();
+        final Map<String, Object> data = new HashMap<>();
         data.put("message", rawData.getFormattedMessage());
         data.put("logger", rawData.getLoggerName());
         data.put("thread", rawData.getThreadName());

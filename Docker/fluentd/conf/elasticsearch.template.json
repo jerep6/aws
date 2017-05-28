@@ -31,11 +31,7 @@
         "@timestamp": { "type": "date", "index": "not_analyzed" },
         "@version": { "type": "keyword" },
         "message": { "type": "text" },
-        "severity": { "type": "keyword" },
-        "fields": {
-          "type": "object",
-          "dynamic": true
-        }
+        "severity": { "type": "keyword" }
       }
     }
   }

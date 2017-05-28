@@ -3,7 +3,10 @@
     <property name="CONSOLE_NAME" value="CONSOLE"/>
     <property name="LOGMATIC_NAME" value="LOGMATIC_OFF" />
     <property name="FLUENTD_NAME" value="FLUENTD" />
+    <property name="KINESIS_NAME" value="KINESIS" />
 
+
+    <!-- CONSOLE -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <Pattern>%date{yyyy/MM/dd HH:mm:ss.SSS,Europe/Paris} %5level [%thread] %logger{16} | [Key=%X{key}] period=%X{period} - %m%n</Pattern>
@@ -18,12 +21,14 @@
             <level>OFF</level>
         </filter>
     </appender>
+    <!-- CONSOLE END -->
 
 
+    <!-- FLUENTD-->
     <appender name="FLUENT_SYNC" class="fr.xebia.logger.FluentdLogbackAppender">
         <tag>xebia</tag>
         <label>java</label>
-        <remoteHost>URL_ELB</remoteHost>
+        <remoteHost>URL_FLUENTD</remoteHost>
         <port>24224</port>
         <additionalField>
             <key>app</key>
@@ -31,6 +36,16 @@
         </additionalField>
     </appender>
 
+    <appender name="FLUENTD" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- https://logback.qos.ch/manual/appenders.html#AsyncAppender-->
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <appender-ref ref="FLUENT_SYNC" />
+    </appender>
+    <!-- FLUENTD END -->
+
+
+    <!-- LOGMATIC -->
     <appender name="LOGMATIC" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <destination>api.logmatic.io:10514</destination>
         <keepAliveDuration>1 minute</keepAliveDuration>
@@ -47,19 +62,40 @@
             <level>OFF</level>
         </filter>
     </appender>
+    <!-- LOGMATIC END -->
 
 
-    <appender name="FLUENTD" class="ch.qos.logback.classic.AsyncAppender">
-        <!-- https://logback.qos.ch/manual/appenders.html#AsyncAppender-->
-        <queueSize>512</queueSize>
-        <discardingThreshold>0</discardingThreshold>
-        <appender-ref ref="FLUENT_SYNC" />
+    <!-- KINESIS -->
+    <appender name="KINESIS" class="com.gu.logback.appender.kinesis.JSONFirehoseAppender">
+        <bufferSize>500</bufferSize>
+        <threadCount>10</threadCount>
+        <roleToAssumeArn>arn:aws:iam::ACCOUNT_ID:role/logsfirehose</roleToAssumeArn>
+        <region>eu-west-1</region>
+        <maxRetries>3</maxRetries>
+        <shutdownTimeout>30</shutdownTimeout>
+        <streamName>LogsToElasticsearch</streamName>
+        <encoding>UTF-8</encoding>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%m</pattern>
+        </layout>
     </appender>
+
+    <appender name="KINESIS_OFF" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder><Pattern>-</Pattern></encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>OFF</level>
+        </filter>
+    </appender>
+    <!-- KINESIS END -->
+
+
+
 
     <logger name="fr.xebia" level="debug" additivity="false">
         <appender-ref ref="${CONSOLE_NAME}" />
         <appender-ref ref="${FLUENTD_NAME}" />
         <appender-ref ref="${LOGMATIC_NAME}" />
+        <appender-ref ref="${KINESIS_NAME}" />
     </logger>
 
 

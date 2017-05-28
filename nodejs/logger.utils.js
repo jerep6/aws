@@ -1,7 +1,7 @@
 'use strict';
 const winston = require('winston'),
   config = require('./config'),
-  WinstonFluent = require('winston-fluent').Fluent,
+  WinstonFirehose = require('winston-firehose'),
   _ = require('lodash');
 
 const logger = new winston.Logger({
@@ -40,6 +40,16 @@ if (config.log.fluentd.use) {
     options: {
       host: config.log.fluentd.host,
       port: config.log.fluentd.port
+    }
+  }, false);
+}
+
+if (config.log.firehose.use) {
+  console.log('Use log_firehose logger');
+  logger.add(WinstonFirehose, {
+    streamName: config.log.firehose.stream,
+    firehoseOptions: {
+      region: config.log.firehose.region
     }
   }, false);
 }

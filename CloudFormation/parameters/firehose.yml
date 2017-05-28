@@ -1,4 +1,4 @@
 ElasticsearchArn:
   stack_output: elasticsearch-logs/DomainArn
 S3NameToWriteFailMessages: ""
-ArnLambdaToTransform: ""
+LambdaToTransform: "FirehoseConvertLogs"

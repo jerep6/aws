@@ -65,7 +65,7 @@ Resources:
         CloudWatchLoggingOptions:
           Enabled: true
           LogGroupName: !Ref LogGroupFirehose
-          LogStreamName: "ElasticsearchDelivery"
+          LogStreamName: !Ref LogStreamElasticsearch
         DomainARN: !Ref ElasticsearchArn
         IndexName: logsfirehose
         TypeName: log
@@ -82,7 +82,7 @@ Resources:
           CloudWatchLoggingOptions:
             Enabled: true
             LogGroupName: !Ref LogGroupFirehose
-            LogStreamName: s3
+            LogStreamName: !Ref LogStreamS3
           CompressionFormat: GZIP
           Prefix: firehose-logs
           RoleARN: !GetAtt ["IAMRole", "Arn"]
@@ -92,6 +92,18 @@ Resources:
       Type: 'AWS::Logs::LogGroup'
       Properties:
         RetentionInDays: !Ref CloudWatchLogsRetentionInDays
+
+  LogStreamElasticsearch:
+    Type: "AWS::Logs::LogStream"
+    Properties:
+      LogGroupName: !Ref LogGroupFirehose
+      LogStreamName: ElasticsearchDelivery
+
+  LogStreamS3:
+    Type: "AWS::Logs::LogStream"
+    Properties:
+      LogGroupName: !Ref LogGroupFirehose
+      LogStreamName: S3Delivery
 
   IAMRole:
     Type: AWS::IAM::Role

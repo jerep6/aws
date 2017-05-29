@@ -15,7 +15,7 @@ import ch.qos.logback.core.UnsynchronizedAppenderBase;
 
 public class FluentdLogbackAppender extends UnsynchronizedAppenderBase<ILoggingEvent> {
     private FluentLogger fluentLogger;
-    private Pattern patternMetadata = Pattern.compile("([\\w\\d-]+=[\\w\\d-]+)+", Pattern.CASE_INSENSITIVE);
+    private Pattern patternMetadata = Pattern.compile("([\\w\\d-]+=[@+\\w\\d\\.-]+)+", Pattern.CASE_INSENSITIVE);
 
     @Override
     public void start() {

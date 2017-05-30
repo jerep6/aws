@@ -2,7 +2,7 @@
 
 // Regex to extract key values in logs
 // "End processing message type=TRACKING, duration=294 ms sampling OK count=0 KO count_bis=0"
-const parser = new RegExp("([\\w\\d-]+=[\\w\\d-]+)+", 'gi');
+const parser = new RegExp("([\\w\\d-]+=[\\w\\d-@\.+]+)+", 'gi');
 
 exports.handler = (event, context, callback) => {
 
@@ -21,14 +21,15 @@ exports.handler = (event, context, callback) => {
         message: data
       }
     }
-
     // Extract key-value from message
     const matches = (finalPayload.message||'').match(parser) || [];
 
     // Append key value into entry
     matches.forEach(elt => {
       const split = elt.split("=");
-      Object.assign(finalPayload, {[split[0]]: split[1]})
+
+      const value = extractValue(split[1]);
+      Object.assign(finalPayload, {[split[0]]: value})
     });
 
     const payload = (Buffer.from(JSON.stringify(finalPayload), 'utf8')).toString('base64');
@@ -42,3 +43,13 @@ exports.handler = (event, context, callback) => {
 
   callback(null, { records: output });
 };
+
+function extractValue(valueString) {
+  try {
+    return JSON.parse(valueString);
+  }
+  catch(e) {
+    return valueString;
+  }
+
+}

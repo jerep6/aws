@@ -28,6 +28,11 @@ Parameters:
     Type: Number
     Default: 35
     Description: Size in GB of EBS volume
+  ElasticsearchVersion:
+    Type: 'String'
+    Default: '5.3'
+    Description: Version of Elasticsearch
+    AllowedValues: ['5.1', '5.3']
   IPToTrust:
     Type: CommaDelimitedList
     Default: ''
@@ -86,7 +91,7 @@ Resources:
             VolumeType: !Ref VolumeType
             Iops: !Ref Iops
           - !Ref AWS::NoValue
-      ElasticsearchVersion: '5.1'
+      ElasticsearchVersion: !Ref ElasticsearchVersion
       ElasticsearchClusterConfig:
         DedicatedMasterCount: !If [MasterEnabled, !Ref MasterCount, !Ref "AWS::NoValue"]
         DedicatedMasterEnabled: !If [MasterEnabled, "true", "false"]
